@@ -254,3 +254,13 @@ body { -webkit-font-smoothing: antialiased; }
 .page-tag { font-size: 13px; padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .12); color: #f3dcc6; }
 .page-source { margin-top: 22px; }
 .prose figure img { margin: 0 auto; max-height: 720px; width: auto; }
+
+/* readable detail pages */
+.prose { max-width: 760px; font-size: 17px; line-height: 1.8; padding-top: 40px; }
+.prose p { margin: 0 0 14px; }
+.prose .sp { height: 4px; }
+.prose figure { margin: 28px 0; }
+.prose figure img { width: 100%; max-height: none; border-radius: 16px; }
+.prose .cols figure img { width: 100%; }
+img.emoji { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -0.2em; margin-right: .15em; border-radius: 0; }
+.page-cover { max-width: 760px; margin: 32px auto 0; display: block; }

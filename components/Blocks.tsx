@@ -134,11 +134,26 @@ function Block({ b }: { b: any }) {
   }
 }
 
+/** Facebook/Twemoji emoji pasted into Notion arrive as separate image blocks. */
+const isEmojiImg = (b: any) =>
+  b?.type === "image" && b.image?.type === "external" && /emoji\.php|\/emoji\/|twemoji/.test(b.image.external.url);
+
 export function Blocks({ blocks }: { blocks: any[] }) {
-  // group consecutive list items into <ul>/<ol>
+  // group consecutive list items into <ul>/<ol>; fold emoji images into the next line
   const out: React.ReactNode[] = [];
   for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
+    if (isEmojiImg(b)) {
+      const emojis: any[] = [];
+      while (i < blocks.length && isEmojiImg(blocks[i])) emojis.push(blocks[i++]);
+      const next = blocks[i];
+      const icons = emojis.map((e) => <img key={e.id} className="emoji" src={e.image.external.url} alt="" />);
+      if (next && ["paragraph", "heading_1", "heading_2", "heading_3"].includes(next.type)) {
+        const Tag = ({ paragraph: "p", heading_1: "h2", heading_2: "h3", heading_3: "h4" } as any)[next.type];
+        out.push(<Tag key={next.id}>{icons} <Text rt={next[next.type].rich_text} /></Tag>);
+      } else { out.push(<p key={emojis[0].id}>{icons}</p>); i--; }
+      continue;
+    }
     if (b.type === "bulleted_list_item" || b.type === "numbered_list_item") {
       const t = b.type, items = [];
       while (i < blocks.length && blocks[i].type === t) {
