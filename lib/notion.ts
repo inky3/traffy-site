@@ -13,8 +13,8 @@ const clients = [notion, feed].filter((c, i, a) => c && a.indexOf(c) === i) as C
 const DS = {
   sections: process.env.NOTION_SECTIONS_DS || "4251ee1b-cf19-813b-af41-000b3f1f4052",
   // database (or page holding the database) from the links the team already updates
-  activities: process.env.NOTION_ACTIVITIES_DB || "253430d4aa7b80858cede1d4e9fcb5cc",
-  social: process.env.NOTION_SOCIAL_DB || "253430d4aa7b80daac41c553917fff61",
+  activities: process.env.NOTION_ACTIVITIES_DB || "b8b1ee1bcf1982238d4981aa288a229c",
+  social: process.env.NOTION_SOCIAL_DB || "6301ee1bcf198351a73c81672cc7236f",
 };
 
 export type Section = {
@@ -142,7 +142,7 @@ async function latest(dbId: string, limit: number) {
 
 export async function getActivities(limit = 4): Promise<Activity[]> {
   if (!feed) return snapshot.activities.slice(0, limit);
-  const rows = await latest(DS.activities, limit);
+  const rows = await latest(DS.activities, limit).catch((e) => { console.error(e); return []; });
   return Promise.all(rows.map(async (r) => ({
     id: clean(r.id),
     title: plain(byType(r, "title")?.title),
@@ -154,7 +154,7 @@ export async function getActivities(limit = 4): Promise<Activity[]> {
 
 export async function getSocial(limit = 4): Promise<Social[]> {
   if (!feed) return snapshot.social.slice(0, limit).map((s) => ({ ...s, cover: null }));
-  const rows = await latest(DS.social, limit);
+  const rows = await latest(DS.social, limit).catch((e) => { console.error(e); return []; });
   return Promise.all(rows.map(async (r) => ({
     id: clean(r.id),
     title: plain(byType(r, "title")?.title),
