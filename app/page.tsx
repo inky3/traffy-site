@@ -8,10 +8,10 @@ const v = (i: number) => ({ "--i": i }) as React.CSSProperties; // stagger index
 
 const thDate = (d: string) => d ? new Date(d).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "";
 
-function Btn({ s, light }: { s: Section; light?: boolean }) {
+function Btn({ s, ghost }: { s: Section; ghost?: boolean }) {
   if (!s.link || !s.buttonText) return null;
   const h = toHref(s.link);
-  const cls = light ? "btn btn-light" : "btn";
+  const cls = ghost ? "btn btn-ghost" : "btn";
   return h.startsWith("/") ? <Link href={h} className={cls}>{s.buttonText}</Link>
     : <a href={h} className={cls} target="_blank" rel="noreferrer">{s.buttonText}</a>;
 }
@@ -20,12 +20,14 @@ function Btn({ s, light }: { s: Section; light?: boolean }) {
 function Hero({ s }: { s: Section }) {
   return (
     <section className="hero">
-      <div className="wrap hero-text">
-        <span className="eyebrow">{s.name}</span>
-        <h1>{s.subtitle || s.name}</h1>
-        <div className="row hero-cta"><Btn s={s} /><a className="btn btn-light" href="#activities">ดูความเคลื่อนไหว</a></div>
+      <div className="hero-media"><img className="hero-cover" src={s.images[0] || "/brand/cover.webp"} alt={s.subtitle || s.name} /></div>
+      <div className="wrap hero-bar">
+        <div>
+          <h1>{s.name}</h1>
+          <p className="lead">{s.subtitle}</p>
+        </div>
+        <div className="row"><Btn s={s} /><a className="btn btn-ghost" href="#activities">ดูความเคลื่อนไหว</a></div>
       </div>
-      <div className="wrap"><div className="hero-media"><img className="hero-cover" src={s.images[0] || "/brand/cover.webp"} alt={s.subtitle || s.name} /></div></div>
     </section>
   );
 }
@@ -70,7 +72,7 @@ async function Activities({ s }: { s: Section }) {
   const items = await getActivities(4);
   return (
     <section className="wrap sec" id="activities">
-      <Head s={s} extra={<Btn s={s} light />} />
+      <Head s={s} extra={<Btn s={s} ghost />} />
       <div className="cards cards-feature" data-reveal>
         {items.map((a, i) => (
           <Link key={a.id} href={`/p/${a.id}`} className="card" style={v(i)}>
@@ -114,7 +116,7 @@ function Grid({ s }: { s: Section }) {
 }
 
 function EmbedSec({ s }: { s: Section }) {
-  return <section className="wrap sec"><Head s={s} extra={<a className="btn btn-light" href={s.link} target="_blank" rel="noreferrer">เปิดเว็บไซต์ ↗</a>} />
+  return <section className="wrap sec"><Head s={s} extra={<a className="btn btn-ghost" href={s.link} target="_blank" rel="noreferrer">เปิดเว็บไซต์ ↗</a>} />
     <div className="browser" data-reveal><div className="browser-bar"><i /><i /><i /><span>{s.link.replace(/^https?:\/\//, "")}</span></div>
       <iframe src={s.link} title={s.name} loading="lazy" /></div>
   </section>;

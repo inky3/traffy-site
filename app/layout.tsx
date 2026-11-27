@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <footer className="foot">
           <div className="wrap foot-grid">
             <div className="foot-brand">
-              <img className="foot-logo" src="/brand/logo.svg" alt="Traffy Fondue" width={120} height={120} />
+              <img className="foot-logo" src="/brand/logo-white.svg" alt="Traffy Fondue" width={120} height={120} />
               <p>เจอปัญหาเมือง แจ้งง่าย ตามได้จริง</p>
               <p className="muted">
                 กลุ่มนวัตกรรมดิจิทัลสำหรับเมือง<br />สำนักงานพัฒนาวิทยาศาสตร์และเทคโนโลยีแห่งชาติ (สวทช.)<br />

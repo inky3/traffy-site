@@ -209,91 +209,41 @@ td, th { border: 1px solid var(--line); padding: 8px 12px; text-align: left; } t
 .frame-slides { background: var(--bg-soft); }
 
 /* =========================================================
-   Clean theme (white space, big type, soft surfaces).
-   Brand brown stays as the one strong colour.
+   Clean + 60/30/10:
+   60% white/cream surfaces · 30% brand brown · 10% orange accent
    ========================================================= */
-:root { --ink: #161210; --muted: #6f6660; --line: #ece8e4; --bg-soft: #f6f4f1; --r: 28px; --shadow: none; }
+:root { --ink: #2b1d14; --line: #f1e7dc; --bg-soft: #fbf6f0; --shadow: 0 12px 32px rgba(92, 51, 24, .07); }
 body { -webkit-font-smoothing: antialiased; }
-
-/* nav */
-.top { background: rgba(255, 255, 255, .72); border-bottom: 0; }
-.top-in { height: 68px; }
-.top nav { margin: 0 auto; gap: 28px; }
-.top nav a { color: var(--muted); font-size: 14px; font-weight: 500; }
-.top nav a:hover { color: var(--ink); }
-.btn { background: var(--navy); box-shadow: none; padding: 13px 26px; }
-.btn:hover { transform: none; background: #42240f; }
-.btn-light { background: var(--bg-soft); color: var(--ink); }
-.btn-light:hover { background: #ebe6e0; }
-.btn-sm { padding: 9px 18px; }
-
-/* hero */
-.hero { background: #fff; color: var(--ink); padding-top: 96px; }
-.hero-text { text-align: center; max-width: 880px; }
-.hero .eyebrow { background: none; padding: 0; color: var(--navy); font-family: "Nunito", sans-serif; font-weight: 800; font-size: 16px; letter-spacing: .02em; }
-.hero h1 { font-family: "IBM Plex Sans Thai", sans-serif; font-weight: 700; font-size: clamp(38px, 6.4vw, 76px); line-height: 1.12; letter-spacing: -.02em; margin: 14px 0 32px; }
-.hero-cta { justify-content: center; animation: rise .8s .3s ease-out both; }
-.hero-text > * { animation: rise .8s ease-out both; }
-.hero-text h1 { animation-delay: .1s; }
-.hero-media { margin-top: 64px; border-radius: var(--r); }
-.hero-cover { aspect-ratio: 2048/768; border-radius: var(--r); }
-@media (max-width: 700px) { .hero { padding-top: 56px; } .hero-media { margin-top: 40px; } .hero-cover { aspect-ratio: 4/3; } }
-
-/* sections */
-.sec { padding-top: 128px; padding-bottom: 0; }
-.soft { background: none; margin-top: 0; padding-bottom: 0; }
-.sec-head { margin-bottom: 40px; align-items: end; }
-.sec-head h2 { font-size: clamp(30px, 4.2vw, 52px); line-height: 1.15; letter-spacing: -.02em; color: var(--ink); font-weight: 700; }
-.sec-head h2::after { display: none; }
-.sec-head p { font-size: 18px; max-width: 620px; }
-@media (max-width: 700px) { .sec { padding-top: 88px; } }
-
-/* surfaces: no borders, no shadows, soft grey */
-.card, .news, .aud-card, .slide, .linkcard, .browser { border: 0; box-shadow: none; background: var(--bg-soft); }
-.card:hover, .news:hover, .aud-card:hover { box-shadow: none; }
-.card img, .news img, .card-ph, .news .card-ph { border-radius: 20px; margin: 10px 10px 0; width: calc(100% - 20px); }
-.card-ph { background: #ece7e1; }
-.card-body { padding: 18px 22px 24px; }
-.card-title, .news-title { font-weight: 600; font-size: 17px; letter-spacing: -.005em; }
-.date { color: var(--muted); font-weight: 500; }
-.tag, .tag-blue { background: #fff; color: var(--muted); font-size: 12px; }
-.news { padding-bottom: 22px; }
-.news > .tags, .news > span { padding: 0 22px; }
-.news img, .news .card-ph { margin-bottom: 6px; }
-
-.cards-feature > :not(:first-child) img, .cards-feature > :not(:first-child) .card-ph { margin: 10px 0 10px 10px; width: 40%; }
-.cards-feature > :first-child .card-title { font-size: 24px; }
-
-.aud-card { padding: 10px; }
-.aud-card img { border-radius: 20px; }
-.aud-body { border-top: 0; padding: 24px 18px 18px; }
-.aud-body h3 { color: var(--ink); font-size: 28px; letter-spacing: -.01em; }
-.aud-cta, .aud-blue .aud-cta { color: var(--navy); }
-
-.banner img, .grid img { box-shadow: none; border-radius: var(--r); }
-.frame { box-shadow: none; border-radius: var(--r); }
-.browser { padding: 10px; } .browser iframe { border-radius: 18px; background: #fff; }
-.browser-bar { background: none; border: 0; }
-.slide { padding: 10px; } .slide .frame { border-radius: 18px; }
-.slide-meta { color: var(--ink); padding: 16px 12px 8px; }
-.slide-meta a { color: var(--navy); }
-.linkcard { color: var(--ink); } .linkcard:hover { border: 0; background: #ebe6e0; }
-.lc-arrow { color: var(--navy); }
-
-/* footer */
-.foot { background: var(--bg-soft); color: var(--muted); margin-top: 160px; }
-.foot h5 { color: var(--ink); }
-.foot-grid > div > a { color: var(--muted); }
-.foot-grid a:hover { color: var(--ink); }
-.foot .muted { color: var(--muted); }
-.foot .muted a { color: var(--ink); }
-.foot-bottom { border-top: 1px solid var(--line); color: var(--muted); }
-.foot-logo { width: 96px; height: 96px; }
-
-/* sub-pages */
-.page-head { background: #fff; color: var(--ink); padding: 96px 0 24px; text-align: center; }
-.page-head h1 { font-size: clamp(34px, 5.4vw, 64px); letter-spacing: -.02em; }
-.page-head h1::after { display: none; }
-.prose { max-width: 1000px; }
-.prose h2, .prose h3 { color: var(--ink); letter-spacing: -.01em; }
 .hero h1, .sec-head h2, .page-head h1 { text-wrap: balance; }
+
+/* nav: quiet, brown text, orange CTA */
+.top { border-bottom: 1px solid var(--line); }
+.top nav a { color: var(--navy); opacity: .8; font-size: 14px; }
+.top nav a:hover { opacity: 1; color: var(--orange); }
+
+/* buttons: orange = the 10% */
+.btn { box-shadow: none; }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+
+/* more breathing room */
+.sec { padding-top: 104px; }
+.soft { margin-top: 104px; padding-bottom: 104px; background: var(--bg-soft); }
+.soft .sec { padding-top: 88px; }
+.sec-head { margin-bottom: 36px; }
+.sec-head h2 { font-size: clamp(28px, 3.8vw, 44px); letter-spacing: -.01em; }
+.sec-head h2::after { width: 40px; height: 4px; margin-top: 14px; }
+.hero-bar { padding-top: 36px; padding-bottom: 40px; }
+@media (max-width: 700px) { .sec { padding-top: 72px; } .soft { margin-top: 72px; padding-bottom: 72px; } }
+
+/* cards: borderless cream on white, white on cream sections */
+.card, .aud-card, .linkcard, .browser { border: 0; background: var(--bg-soft); box-shadow: none; }
+.soft .news, .soft .slide, .soft .linkcard { border: 0; background: #fff; box-shadow: var(--shadow); }
+.news { border: 0; box-shadow: var(--shadow); }
+.card:hover, .aud-card:hover, .news:hover { box-shadow: var(--shadow); }
+.card-body { padding: 18px 20px 22px; }
+.aud-body { border-top-width: 3px; }
+.banner img, .grid img { box-shadow: none; }
+
+/* footer stays brown (part of the 30%) */
+.foot { margin-top: 0; }
+.btn-ghost { box-shadow: inset 0 0 0 1.5px currentColor; }
