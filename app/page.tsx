@@ -18,14 +18,13 @@ function Btn({ s, ghost }: { s: Section; ghost?: boolean }) {
 function Hero({ s }: { s: Section }) {
   return (
     <section className="hero">
-      <div className="wrap hero-in">
+      <img className="hero-cover" src={s.images[0] || "/brand/cover.webp"} alt={s.subtitle || s.name} />
+      <div className="wrap hero-bar">
         <div>
-          <span className="eyebrow">แพลตฟอร์มรับแจ้งปัญหาเมือง · สวทช.</span>
           <h1>{s.name}</h1>
           <p className="lead">{s.subtitle}</p>
-          <div className="row"><Btn s={s} /><a className="btn btn-ghost" href="#activities">ดูความเคลื่อนไหว</a></div>
         </div>
-        {s.images[0] && <img className="hero-img" src={s.images[0]} alt="" />}
+        <div className="row"><Btn s={s} /><a className="btn btn-ghost" href="#activities">ดูความเคลื่อนไหว</a></div>
       </div>
     </section>
   );

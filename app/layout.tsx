@@ -23,12 +23,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="th">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Nunito:wght@800&display=swap" />
       </head>
       <body>
         <header className="top">
           <div className="wrap top-in">
-            <Link href="/" className="logo"><span className="logo-dot" />Traffy <b>Fondue</b></Link>
+            <Link href="/" className="logo"><img src="/brand/icon.png" alt="" width={40} height={40} /><span>Traffy <b>Fondue</b></span></Link>
             <nav>{nav.map((l) => <A key={l.id} href={l.link}>{l.name}</A>)}</nav>
             <a className="btn btn-sm" href="https://lin.ee/pRPBNq2" target="_blank" rel="noreferrer">แจ้งปัญหา</a>
           </div>
@@ -39,7 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <footer className="foot">
           <div className="wrap foot-grid">
             <div className="foot-brand">
-              <div className="logo logo-light"><span className="logo-dot" />Traffy <b>Fondue</b></div>
+              <img className="foot-logo" src="/brand/logo-white.svg" alt="Traffy Fondue" width={120} height={120} />
               <p>เจอปัญหาเมือง แจ้งง่าย ตามได้จริง</p>
               <p className="muted">
                 กลุ่มนวัตกรรมดิจิทัลสำหรับเมือง<br />สำนักงานพัฒนาวิทยาศาสตร์และเทคโนโลยีแห่งชาติ (สวทช.)<br />

@@ -27,8 +27,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ kind: st
 
 function placeholder(label: string) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8eefb"/><stop offset="1" stop-color="#fde9db"/></linearGradient></defs>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6ece2"/><stop offset="1" stop-color="#ffe3c4"/></linearGradient></defs>
   <rect width="1200" height="675" fill="url(#g)"/>
-  <text x="600" y="350" font-family="sans-serif" font-size="40" fill="#8a97b4" text-anchor="middle">${label}</text></svg>`;
+  <text x="600" y="350" font-family="sans-serif" font-size="40" fill="#a3826a" text-anchor="middle">${label}</text></svg>`;
   return new Response(svg, { headers: { "Content-Type": "image/svg+xml" } });
 }
