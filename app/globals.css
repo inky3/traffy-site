@@ -247,3 +247,10 @@ body { -webkit-font-smoothing: antialiased; }
 /* footer stays brown (part of the 30%) */
 .foot { margin-top: 0; }
 .btn-ghost { box-shadow: inset 0 0 0 1.5px currentColor; }
+
+/* detail pages for news / activities */
+.page-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.page-date { color: var(--orange); font-weight: 600; margin-right: 6px; }
+.page-tag { font-size: 13px; padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .12); color: #f3dcc6; }
+.page-source { margin-top: 22px; }
+.prose figure img { margin: 0 auto; max-height: 720px; width: auto; }

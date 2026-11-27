@@ -24,7 +24,7 @@ export type Section = {
 };
 export type Activity = { id: string; title: string; date: string; tags: string[]; cover: string | null };
 export type Social = { id: string; title: string; url: string; source: string; types: string[]; date: string; cover: string | null };
-export type Page = { id: string; title: string; cover: string | null; blocks: any[] };
+export type Page = { id: string; title: string; cover: string | null; blocks: any[]; date?: string; tags?: string[]; sourceUrl?: string };
 
 /* ---------- helpers ---------- */
 export const plain = (rt: any[] = []) => rt.map((t) => t.plain_text).join("");
@@ -207,10 +207,16 @@ export async function getPage(id: string): Promise<Page | null> {
     try {
       const page: any = await c.pages.retrieve({ page_id: id });
       const titleProp: any = Object.values(page.properties).find((p: any) => p.type === "title");
+      const props = Object.values(page.properties) as any[];
       return {
         id, title: plain(titleProp?.title),
         cover: page.cover ? `/img/cover/${id}` : null,
         blocks: await getBlocks(id, c),
+        // database rows (news / activities) carry these
+        date: props.find((p) => p.type === "date")?.date?.start,
+        tags: props.filter((p) => p.type === "multi_select").flatMap((p) => p.multi_select.map((o: any) => o.name))
+          .filter((t: string) => t !== "Facebook"),
+        sourceUrl: props.find((p) => p.type === "url")?.url || undefined,
       };
     } catch { /* not in this workspace, try the next */ }
   }

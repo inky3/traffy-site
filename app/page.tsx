@@ -96,12 +96,12 @@ async function SocialFeed({ s }: { s: Section }) {
       <Head s={s} />
       <div className="cards cards-4" data-reveal>
         {items.map((n, i) => (
-          <a key={n.id} href={n.url || "#"} target="_blank" rel="noreferrer" className="news" style={v(i)}>
+          <Link key={n.id} href={`/p/${n.id}`} className="news" style={v(i)}>
             {n.cover ? <img src={n.cover} alt="" loading="lazy" /> : <div className="card-ph" />}
             <div className="tags">{n.types.map((t) => <span key={t} className="tag tag-blue">{t}</span>)}</div>
             <span className="news-title">{n.title}</span>
             <span className="news-src">{n.source} · {thDate(n.date)}</span>
-          </a>
+          </Link>
         ))}
       </div>
     </div></section>
