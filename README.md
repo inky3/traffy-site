@@ -6,8 +6,8 @@ The team edits content in Notion. This Next.js site reads it through the Notion 
 | What | Where in Notion |
 |---|---|
 | Homepage sections (order, text, images, buttons, show/hide) | **Website – Homepage Sections** database (inside the Test page) |
-| Activities cards | **ล่าสุด** database |
-| News & social cards | **ข่าวและสังคมออนไลน์** database |
+| Activities cards (latest 4) | traffy.in.th **Activities** database (traffyfondue workspace) |
+| News & social cards (latest 4) | **News & Social Media** database (traffyfondue workspace) |
 | Sub-pages (สำหรับประชาชน, สำหรับหน่วยงาน, …) | Edit the Notion page as usual |
 | Footer links | Rows with Type = *Footer link* in the Sections database |
 
@@ -18,14 +18,16 @@ A **Link** can be a website URL or a Notion page link. Notion links automaticall
 2. In Notion, open the **Test** page and use **••• → Connections → add your integration**. Sub-pages inherit access.
 3. Put the code on GitHub, then import it at vercel.com/new.
 4. In Vercel, under Settings → Environment Variables, add:
-   - `NOTION_TOKEN` = the integration secret
+   - `NOTION_TOKEN` = the integration secret (Traffy Web workspace)
+   - `NOTION_FEED_TOKEN` = a second secret from the traffyfondue workspace, connected to the News & Social Media and Activities pages
    - `REVALIDATE_SECRET` = any long random text
 5. Deploy.
 
 Without `NOTION_TOKEN` the site runs on `data/snapshot.json` with placeholder images (preview mode).
 
 ## How updates appear
-- **Automatic:** every page re-reads Notion at most every 5 minutes.
+- **Automatic:** every page re-reads Notion at most every minute.
+- Card images come from the page cover, else the first Files property, else the first picture inside the page.
 - **Instant (optional):** in the Sections database, add an automation (*When a page is edited → Send webhook*) to
   `https://<your-site>/api/revalidate?secret=<REVALIDATE_SECRET>`.
 

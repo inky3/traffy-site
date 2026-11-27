@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getSections, getActivities, getSocial, toHref, type Section } from "@/lib/notion";
 import { Embed, LinkCard } from "@/components/Blocks";
 
-export const revalidate = 300; // re-read Notion at most every 5 min (plus instant via /api/revalidate)
+export const revalidate = 60; // re-read Notion at most every minute // re-read Notion at most every 5 min (plus instant via /api/revalidate)
 
 const thDate = (d: string) => d ? new Date(d).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "";
 
@@ -68,7 +68,7 @@ function Head({ s, extra }: { s: Section; extra?: React.ReactNode }) {
 }
 
 async function Activities({ s }: { s: Section }) {
-  const items = await getActivities(6);
+  const items = await getActivities(4);
   return (
     <section className="wrap sec" id="activities">
       <Head s={s} extra={<Btn s={s} ghost />} />
@@ -89,13 +89,14 @@ async function Activities({ s }: { s: Section }) {
 }
 
 async function SocialFeed({ s }: { s: Section }) {
-  const items = await getSocial(8);
+  const items = await getSocial(4);
   return (
     <section className="soft"><div className="wrap sec">
       <Head s={s} />
-      <div className="scroller">
+      <div className="cards cards-4">
         {items.map((n) => (
           <a key={n.id} href={n.url || "#"} target="_blank" rel="noreferrer" className="news">
+            {n.cover ? <img src={n.cover} alt="" loading="lazy" /> : <div className="card-ph" />}
             <div className="tags">{n.types.map((t) => <span key={t} className="tag tag-blue">{t}</span>)}</div>
             <span className="news-title">{n.title}</span>
             <span className="news-src">{n.source} · {thDate(n.date)}</span>

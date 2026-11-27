@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getPage } from "@/lib/notion";
 import { Blocks } from "@/components/Blocks";
 
-export const revalidate = 300;
+export const revalidate = 60;
 export const dynamicParams = true;
 export function generateStaticParams() { return []; } // pages build on first visit, then cache
 

@@ -5,11 +5,16 @@ import snapshot from "@/data/snapshot.json";
 const token = process.env.NOTION_TOKEN;
 export const live = Boolean(token);
 const notion = token ? new Client({ auth: token }) : null;
+// News & Activities live in another workspace -> its own token (falls back to the main one)
+const feedToken = process.env.NOTION_FEED_TOKEN || token;
+const feed = feedToken ? new Client({ auth: feedToken }) : null;
+const clients = [notion, feed].filter((c, i, a) => c && a.indexOf(c) === i) as Client[];
 
 const DS = {
   sections: process.env.NOTION_SECTIONS_DS || "4251ee1b-cf19-813b-af41-000b3f1f4052",
-  activities: process.env.NOTION_ACTIVITIES_DS || "b631ee1b-cf19-83ce-a9a8-0753f6d9d98a",
-  social: process.env.NOTION_SOCIAL_DS || "83f1ee1b-cf19-82dc-9eb3-07820a42679a",
+  // database (or page holding the database) from the links the team already updates
+  activities: process.env.NOTION_ACTIVITIES_DB || "253430d4aa7b80858cede1d4e9fcb5cc",
+  social: process.env.NOTION_SOCIAL_DB || "253430d4aa7b80daac41c553917fff61",
 };
 
 export type Section = {
@@ -18,7 +23,7 @@ export type Section = {
   images: string[];
 };
 export type Activity = { id: string; title: string; date: string; tags: string[]; cover: string | null };
-export type Social = { id: string; title: string; url: string; source: string; types: string[]; date: string };
+export type Social = { id: string; title: string; url: string; source: string; types: string[]; date: string; cover: string | null };
 export type Page = { id: string; title: string; cover: string | null; blocks: any[] };
 
 /* ---------- helpers ---------- */
@@ -56,11 +61,11 @@ export function toHref(url?: string | null): string {
   return url;
 }
 
-async function queryAll(dataSourceId: string, body: any = {}) {
+async function queryAll(dataSourceId: string, body: any = {}, c: Client = notion!) {
   const out: any[] = [];
   let cursor: string | undefined;
   do {
-    const res: any = await (notion as any).dataSources.query({
+    const res: any = await (c as any).dataSources.query({
       data_source_id: dataSourceId, start_cursor: cursor, page_size: 100, ...body,
     });
     out.push(...res.results);
@@ -89,36 +94,83 @@ export async function getSections(): Promise<Section[]> {
   }));
 }
 
-export async function getActivities(limit = 6): Promise<Activity[]> {
-  if (!notion) return snapshot.activities.slice(0, limit);
-  const res: any = await (notion as any).dataSources.query({
-    data_source_id: DS.activities, page_size: limit,
-    sorts: [{ property: "วันที่", direction: "descending" }],
-  });
-  return res.results.map((r: any) => ({
-    id: clean(r.id), title: prop(r, "Name"), date: prop(r, "วันที่"),
-    tags: prop(r, "ความสำคัญ") || [], cover: r.cover ? `/img/cover/${clean(r.id)}` : null,
-  }));
+/* ---------- feeds (any schema: finds title / date / tags / url / image itself) ---------- */
+const byType = (r: any, t: string) => (Object.values(r.properties) as any[]).find((p) => p.type === t);
+const named = (r: any, names: string[], t: string) =>
+  names.map((n) => r.properties[n]).find((p) => p?.type === t) || byType(r, t);
+
+const dsCache: Record<string, string> = {};
+async function dataSourceOf(id: string): Promise<string> {
+  if (dsCache[id]) return dsCache[id];
+  try {
+    const db: any = await feed!.databases.retrieve({ database_id: id });
+    return (dsCache[id] = db.data_sources[0].id);
+  } catch {
+    // the link is a page that contains the database
+    const kids: any = await feed!.blocks.children.list({ block_id: id, page_size: 100 });
+    const child = kids.results.find((b: any) => b.type === "child_database");
+    if (!child) throw new Error(`No database found in ${id}`);
+    const db: any = await feed!.databases.retrieve({ database_id: child.id });
+    return (dsCache[id] = db.data_sources[0].id);
+  }
 }
 
-export async function getSocial(limit = 8): Promise<Social[]> {
-  if (!notion) return snapshot.social.slice(0, limit);
-  const res: any = await (notion as any).dataSources.query({
-    data_source_id: DS.social, page_size: limit,
-    sorts: [{ property: "Date", direction: "descending" }],
-  });
-  return res.results.map((r: any) => ({
-    id: clean(r.id), title: prop(r, "Name"), url: prop(r, "URL"),
-    source: prop(r, "ที่มา"), types: prop(r, "ประเภท") || [], date: prop(r, "Date"),
-  }));
+/** cover -> first Files property -> first picture inside the page */
+async function imageOf(r: any): Promise<string | null> {
+  const id = clean(r.id);
+  if (r.cover) return `/img/cover/${id}`;
+  const files = (Object.values(r.properties) as any[]).find((p) => p.type === "files" && p.files.length);
+  if (files) return `/img/p/${id}?i=0`;
+  try {
+    const kids: any = await feed!.blocks.children.list({ block_id: r.id, page_size: 30 });
+    const img = kids.results.find((b: any) => b.type === "image");
+    return img ? `/img/b/${clean(img.id)}` : null;
+  } catch { return null; }
 }
 
-/* ---------- sub-pages ---------- */
-async function getBlocks(id: string): Promise<any[]> {
+async function latest(dbId: string, limit: number) {
+  const dsId = await dataSourceOf(dbId);
+  const ds: any = await (feed as any).dataSources.retrieve({ data_source_id: dsId });
+  const dateProp = Object.values(ds.properties as any).find((p: any) => p.type === "date") as any;
+  const res: any = await (feed as any).dataSources.query({
+    data_source_id: dsId, page_size: limit,
+    sorts: dateProp ? [{ property: dateProp.name, direction: "descending" }]
+      : [{ timestamp: "created_time", direction: "descending" }],
+  });
+  return res.results as any[];
+}
+
+export async function getActivities(limit = 4): Promise<Activity[]> {
+  if (!feed) return snapshot.activities.slice(0, limit);
+  const rows = await latest(DS.activities, limit);
+  return Promise.all(rows.map(async (r) => ({
+    id: clean(r.id),
+    title: plain(byType(r, "title")?.title),
+    date: byType(r, "date")?.date?.start ?? r.created_time,
+    tags: (named(r, ["ความสำคัญ", "Tags"], "multi_select")?.multi_select || []).map((o: any) => o.name),
+    cover: await imageOf(r),
+  })));
+}
+
+export async function getSocial(limit = 4): Promise<Social[]> {
+  if (!feed) return snapshot.social.slice(0, limit).map((s) => ({ ...s, cover: null }));
+  const rows = await latest(DS.social, limit);
+  return Promise.all(rows.map(async (r) => ({
+    id: clean(r.id),
+    title: plain(byType(r, "title")?.title),
+    url: byType(r, "url")?.url || "",
+    source: plain(named(r, ["ที่มา", "Source"], "rich_text")?.rich_text),
+    types: (named(r, ["ประเภท", "Tags"], "multi_select")?.multi_select || []).map((o: any) => o.name),
+    date: byType(r, "date")?.date?.start ?? r.created_time,
+    cover: await imageOf(r),
+  })));
+}
+
+async function getBlocks(id: string, c: Client = notion!): Promise<any[]> {
   const blocks: any[] = [];
   let cursor: string | undefined;
   do {
-    const res: any = await notion!.blocks.children.list({ block_id: id, start_cursor: cursor, page_size: 100 });
+    const res: any = await c.blocks.children.list({ block_id: id, start_cursor: cursor, page_size: 100 });
     blocks.push(...res.results);
     cursor = res.has_more ? res.next_cursor : undefined;
   } while (cursor);
@@ -127,17 +179,17 @@ async function getBlocks(id: string): Promise<any[]> {
     // synced copies point at the original block
     const childId = b.type === "synced_block" && b.synced_block.synced_from
       ? b.synced_block.synced_from.block_id : b.id;
-    if (b.has_children && b.type !== "child_page" && b.type !== "child_database") b.children = await getBlocks(childId);
+    if (b.has_children && b.type !== "child_page" && b.type !== "child_database") b.children = await getBlocks(childId, c);
     if (b.type === "link_to_page" && b.link_to_page.page_id) {
       try {
-        const pg: any = await notion!.pages.retrieve({ page_id: b.link_to_page.page_id });
+        const pg: any = await c.pages.retrieve({ page_id: b.link_to_page.page_id });
         b._title = plain((Object.values(pg.properties) as any[]).find((p) => p.type === "title")?.title);
       } catch { b._title = "ลิงก์"; }
     }
     if (b.type === "child_database") {
       try {
-        const db: any = await notion!.databases.retrieve({ database_id: b.id });
-        const rows = await queryAll(db.data_sources[0].id);
+        const db: any = await c.databases.retrieve({ database_id: b.id });
+        const rows = await queryAll(db.data_sources[0].id, {}, c);
         b._rows = rows.slice(0, 30).map((r: any) => ({
           id: clean(r.id),
           title: plain((Object.values(r.properties) as any[]).find((p) => p.type === "title")?.title),
@@ -151,29 +203,35 @@ async function getBlocks(id: string): Promise<any[]> {
 
 export async function getPage(id: string): Promise<Page | null> {
   if (!notion) return (snapshot.pages as any)[id] ?? null;
-  try {
-    const page: any = await notion.pages.retrieve({ page_id: id });
-    const titleProp: any = Object.values(page.properties).find((p: any) => p.type === "title");
-    return {
-      id, title: plain(titleProp?.title),
-      cover: page.cover ? `/img/cover/${id}` : null,
-      blocks: await getBlocks(id),
-    };
-  } catch {
-    return null; // not shared with the integration, or deleted
+  for (const c of clients) {
+    try {
+      const page: any = await c.pages.retrieve({ page_id: id });
+      const titleProp: any = Object.values(page.properties).find((p: any) => p.type === "title");
+      return {
+        id, title: plain(titleProp?.title),
+        cover: page.cover ? `/img/cover/${id}` : null,
+        blocks: await getBlocks(id, c),
+      };
+    } catch { /* not in this workspace, try the next */ }
   }
+  return null; // not shared with the integration, or deleted
 }
 
 /* ---------- fresh file URLs for the image proxy ---------- */
 export async function fileUrl(kind: string, id: string, i = 0): Promise<string | null> {
-  if (!notion) return null;
   const f = (x: any) => x?.type === "external" ? x.external.url : x?.file?.url ?? null;
-  if (kind === "b") {
-    const b: any = await notion.blocks.retrieve({ block_id: id });
-    return f(b[b.type]);
+  for (const c of clients) {
+    try {
+      if (kind === "b") {
+        const b: any = await c.blocks.retrieve({ block_id: id });
+        return f(b[b.type]);
+      }
+      const page: any = await c.pages.retrieve({ page_id: id });
+      if (kind === "cover") return f(page.cover);
+      const files = page.properties?.Images?.files?.length ? page.properties.Images
+        : (Object.values(page.properties) as any[]).find((p) => p.type === "files" && p.files.length);
+      return f(files?.files?.[i]);
+    } catch { /* try next workspace */ }
   }
-  const page: any = await notion.pages.retrieve({ page_id: id });
-  if (kind === "cover") return f(page.cover);
-  if (kind === "p") return f(page.properties?.Images?.files?.[i]);
   return null;
 }
