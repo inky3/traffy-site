@@ -28,21 +28,34 @@ function Text({ rt = [] }: { rt?: any[] }) {
 
 const youtubeId = (u = "") => u.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/)?.[1];
 
-function embedSrc(u: string): string | null {
+/** canva.link/xyz -> full canva.com design URL (follows the redirect once, cached by the page) */
+async function expandShortLink(u: string): Promise<string> {
+  if (!/canva\.link\//.test(u)) return u;
+  try {
+    const r = await fetch(u, { redirect: "manual", next: { revalidate: 86400 } });
+    return r.headers.get("location") || u;
+  } catch { return u; }
+}
+
+export const isSlides = (u = "") => /canva\.(link|com\/design)|docs\.google\.com\/presentation/.test(u);
+
+export async function embedSrc(raw: string): Promise<string | null> {
+  const u = await expandShortLink(raw);
   const yt = youtubeId(u);
   if (yt) return `https://www.youtube.com/embed/${yt}`;
-  if (/canva\.com\/design\//.test(u)) return u.replace(/\/(edit|view).*$/, "/view?embed");
-  if (/docs\.google\.com\/presentation/.test(u)) return u.replace(/\/edit.*$/, "/embed");
+  const canva = u.match(/canva\.com\/design\/([^/]+)\/([^/?]+)/);
+  if (canva) return `https://www.canva.com/design/${canva[1]}/${canva[2]}/view?embed`;
+  if (/docs\.google\.com\/presentation/.test(u)) return u.replace(/\/(edit|pub|view).*$/, "/embed");
   if (/canva\.link|facebook\.com/.test(u)) return null; // can't be framed
   return u;
 }
 
-export function Embed({ url, title }: { url: string; title?: string }) {
-  const src = embedSrc(url);
+export async function Embed({ url, title }: { url: string; title?: string }) {
+  const src = await embedSrc(url);
   if (!src) return <LinkCard href={url} title={title || "เปิดเอกสาร"} />;
   return (
-    <div className="frame">
-      <iframe src={src} title={title || "embed"} loading="lazy" allowFullScreen />
+    <div className={`frame${isSlides(url) ? " frame-slides" : ""}`}>
+      <iframe src={src} title={title || "embed"} loading="lazy" allowFullScreen allow="fullscreen" />
     </div>
   );
 }

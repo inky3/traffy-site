@@ -1,6 +1,7 @@
 import Link from "next/link";
 import "./globals.css";
 import { getSections, toHref } from "@/lib/notion";
+import Reveal from "@/components/Reveal";
 
 export const metadata = {
   title: "Traffy Fondue – เจอปัญหาเมือง แจ้งง่าย ตามได้จริง",
@@ -35,6 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </header>
 
         <main>{children}</main>
+        <Reveal />
 
         <footer className="foot">
           <div className="wrap foot-grid">
